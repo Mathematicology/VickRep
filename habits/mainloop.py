@@ -1,5 +1,5 @@
 #mainloop.py - FIXED VERSION
-from habits import Habit, save_habits_json, load_habits, load_habit_object
+from habits import Habit, save_habits, load_habits, load_habit_object
 import json
 
 print("=" * 50)
@@ -14,7 +14,7 @@ while True:
         habit = input('📝 Habit name: ').strip()
         if habit:
             h1 = Habit(habit)
-            save_habits_json(h1, 'habit.json')
+            save_habits(h1, 'habit.json')
         else:
             print("❌ Habit name cannot be empty!")
     
@@ -34,7 +34,7 @@ while True:
                 custom_date = input('📅 Enter date (YYYY-MM-DD): ').strip()
                 h1.complete(custom_date)  # Uses custom date
             
-            save_habits_json(h1, 'habit.json')
+            save_habits(h1, 'habit.json')
         else:
             print(f"❌ Habit '{habit_name}' not found!")
     
@@ -47,7 +47,7 @@ while True:
         if h1:
             note = input('✏️  Add a note: ').strip()
             h1.add_note(note)
-            save_habits_json(h1, 'habit.json')
+            save_habits(h1, 'habit.json')
         else:
             print(f"❌ Habit '{habit_name}' not found!")
     
