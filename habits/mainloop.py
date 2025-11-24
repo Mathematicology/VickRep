@@ -1,55 +1,86 @@
-#mainloop
-from habits import Habit, save_habits_json, load_habits
+#mainloop.py - FIXED VERSION
+from habits import Habit, save_habits_json, load_habits, load_habit_object
 import json
 
+print("=" * 50)
+print("🎯 HABIT TRACKER")
+print("=" * 50)
+
 while True:
-    task = input('what would you like me to do add/complete/note/show/delete/exit: ')
+    print("\n📋 Commands: add | complete | note | show | delete | exit")
+    task = input('➤ What would you like to do? ').strip().lower()
     
     if task == 'add':
-        habit = input('What habit would like to add: ')
-        h1 = Habit(habit)
-        save_habits_json(h1, 'habit.json')
-    
-    if task == 'complete':
-        habit_name = input('Which habit did you complete? ')
-        habits = load_habits('habit.json')
-        if habit_name in habits:
-            h1 = Habit(habit_name)
-            h1.count = habits[habit_name]['count']
-            h1.last_done = habits[habit_name]['last_done']
-            h1.note = habits[habit_name]['note']
-            h1.complete()
+        habit = input('📝 Habit name: ').strip()
+        if habit:
+            h1 = Habit(habit)
             save_habits_json(h1, 'habit.json')
         else:
-            print('Habit not found!')
+            print("❌ Habit name cannot be empty!")
     
-    if task == 'note':
-        habit_name = input('Which habit? ')
-        habits = load_habits('habit.json')
-        if habit_name in habits:
-            h1 = Habit(habit_name)
-            h1.count = habits[habit_name]['count']
-            h1.last_done = habits[habit_name]['last_done']
-            h1.note = habits[habit_name]['note']
-            note = input('Add a note: ')
+    elif task == 'complete':
+        habit_name = input('✓ Which habit did you complete? ').strip()
+        
+        # Load the habit with ALL its data preserved
+        h1 = load_habit_object(habit_name, 'habit.json')
+        
+        if h1:
+            # Ask if they want to specify a date
+            date_choice = input('📅 Complete for today? (y/n): ').strip().lower()
+            
+            if date_choice == 'y':
+                h1.complete()  # Uses today's date
+            else:
+                custom_date = input('📅 Enter date (YYYY-MM-DD): ').strip()
+                h1.complete(custom_date)  # Uses custom date
+            
+            save_habits_json(h1, 'habit.json')
+        else:
+            print(f"❌ Habit '{habit_name}' not found!")
+    
+    elif task == 'note':
+        habit_name = input('📌 Which habit? ').strip()
+        
+        # Load the habit with ALL its data preserved
+        h1 = load_habit_object(habit_name, 'habit.json')
+        
+        if h1:
+            note = input('✏️  Add a note: ').strip()
             h1.add_note(note)
             save_habits_json(h1, 'habit.json')
         else:
-            print('Habit not found!')
+            print(f"❌ Habit '{habit_name}' not found!")
     
-    if task == 'show':
-        print(load_habits('habit.json'))
-    
-    if task == 'delete':
-        habit = input('What habit do you want to remove? ')
+    elif task == 'show':
         habits = load_habits('habit.json')
-        if habit in habits:
-            del habits[habit]
-            with open('habit.json', 'w') as f:
-                json.dump(habits, f, indent=2)
-            print(f'Habit "{habit}" deleted!')
+        if habits:
+            print("\n" + "=" * 50)
+            print("📊 YOUR HABITS")
+            print("=" * 50)
+            for name, data in habits.items():
+                h = Habit.from_dict(name, data)
+                print(f"\n🔹 {h}")
+            print("=" * 50)
         else:
-            print('Habit not found!')
+            print("📭 No habits tracked yet!")
     
-    if task == 'exit':
+    elif task == 'delete':
+        habit = input('🗑️  Which habit to remove? ').strip()
+        habits = load_habits('habit.json')
+        
+        if habit in habits:
+            confirm = input(f'⚠️  Delete "{habit}"? (y/n): ').strip().lower()
+            if confirm == 'y':
+                del habits[habit]
+                with open('habit.json', 'w') as f:
+                    json.dump(habits, f, indent=2)
+                print(f'✓ Habit "{habit}" deleted!')
+        else:
+            print(f"❌ Habit '{habit}' not found!")
+    
+    elif task == 'exit':
+        print("👋 Goodbye! Keep building those habits!")
         break
+    
+    else:
+        print("❌ Invalid command! Try: add, complete, note, show, delete, or exit")
